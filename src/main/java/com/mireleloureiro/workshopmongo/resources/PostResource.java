@@ -1,12 +1,14 @@
 package com.mireleloureiro.workshopmongo.resources;
 
 import com.mireleloureiro.workshopmongo.domain.Post;
+import com.mireleloureiro.workshopmongo.resources.util.URL;
 import com.mireleloureiro.workshopmongo.services.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URLDecoder;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -24,8 +26,20 @@ public class PostResource {
 
     @RequestMapping(value = "titlesearch", method = RequestMethod.GET)
     public ResponseEntity<List<Post>> findByTitle(@RequestParam(value = "text", defaultValue = "") String text) {
-        text = URLDecoder.decode(text);
+        text = URL.decodeParam(text);
         List<Post> list = service.findByTitle(text);
+        return ResponseEntity.ok().body(list);
+    }
+
+    @RequestMapping(value = "fullsearch", method = RequestMethod.GET)
+    public ResponseEntity<List<Post>> fullSearch(
+            @RequestParam(value = "text", defaultValue = "") String text,
+            @RequestParam(value = "minDate", defaultValue = "") String minDate,
+            @RequestParam(value = "maxDate", defaultValue = "") String maxDate) {
+        text = URL.decodeParam(text);
+        Date min = URL.convertDate(minDate, new Date(0L));
+        Date max = URL.convertDate(maxDate, new Date());
+        List<Post> list = service.fullSearch(text, min, max);
         return ResponseEntity.ok().body(list);
     }
 }
